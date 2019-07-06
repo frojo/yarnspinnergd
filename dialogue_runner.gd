@@ -13,11 +13,6 @@ var is_dialogue_running: bool = false
 var dialogue: Dialogue
 
 func _ready() -> void:
-	# todo: figure out how to make this configurable
-	# dialogue_ui = load('res://dialogue_ui.gd').new()
-
-	print('made a new dialogue runner')
-
 	dialogue = Dialogue.new()
 
 	if source_text:
