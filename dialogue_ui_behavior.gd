@@ -3,7 +3,6 @@ extends Node
 # subclass this in your game
 class_name DialogueUIBehavior
 
-
 func _ready() -> void:
 	pass
 
