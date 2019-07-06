@@ -24,7 +24,6 @@ func _process(delta: float) -> void:
 func start_dialogue(start_node: String = 'Start') -> void:
 	# todo: package this pattern into a function
 	# but also need to like loop on this or something
-	print('start_node= ', start_node)
 	var ret = dialogue_ui.dialogue_started()
 	if ret:
 		yield(ret, 'completed')
