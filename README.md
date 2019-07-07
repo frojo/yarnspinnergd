@@ -1,8 +1,6 @@
 # yarnspinnergd
 
-<aside class="warning">
 **WARNING: yarnspinnergd is still super barebones and in early development. It lacks _almost all__ of the standard features of Unity Yarn Spinner and is very untested. [See below](todo) for more details.**
-</aside>
 
 yarnspinnergd is a tool for helping to make games with interactive dialogue in [Godot](https://godotengine.org/). It's port of [Yarn Spinner](https://github.com/thesecretlab/YarnSpinner). It serves the same purpose as Unity YarnSpinner (and adhere's pretty closely to its design), but is written entirely in GDScript instead of C#.
 
