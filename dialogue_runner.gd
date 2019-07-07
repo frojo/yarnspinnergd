@@ -39,7 +39,7 @@ func start_dialogue(start_node: String = 'Start') -> void:
 		elif step is Dialogue.NodeCompleteResult:
 			print('(dr) todo: handle node copmlete')
 
-	# todo: make this yield-able
+	# todo: make this yield-able?
 	dialogue_ui.dialogue_complete()
 
 
