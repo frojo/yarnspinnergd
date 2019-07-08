@@ -1,6 +1,6 @@
 # yarnspinnergd
 
-**WARNING: yarnspinnergd is still super barebones and in early development. It lacks _almost all__ of the standard features of Unity Yarn Spinner and is very untested. [See below](todo) for more details.**
+**WARNING: yarnspinnergd is still super barebones and in early development. It lacks _almost all_ of the standard features of Unity Yarn Spinner and is very untested. [See below](#missing-features) for more details.**
 
 yarnspinnergd is a tool for helping to make games with interactive dialogue in [Godot](https://godotengine.org/). It's port of [Yarn Spinner](https://github.com/thesecretlab/YarnSpinner). It serves the same purpose as Unity YarnSpinner (and adhere's pretty closely to its design), but is written entirely in GDScript instead of C#.
 
@@ -10,7 +10,7 @@ yarnspinnergd is in very early development and is missing many important and cor
 * importing .yarn.txt files
 * running pure text lines (i.e. any commands, conditionals, even node links are **not supported**)
 
-That's it. To drive the point home, here's some important features that yarnspinnergd _does not_ support:
+That's basically _it_. To drive the point home, here's some important features that yarnspinnergd _does not_ support:
 * proper error handling
 * importing from a json file
 * tags
@@ -20,18 +20,43 @@ That's it. To drive the point home, here's some important features that yarnspin
 
 ## Usage
 
-todo: quickstart guide
+### Getting started
 
-todo: example project
+> Before using yarnspinnergd, it's recommended to learn how to write a [Yarn file](https://github.com/infiniteammoinc/Yarn) and a little about [Godot](https://docs.godotengine.org/en/3.1/getting_started/step_by_step/your_first_game.html) first.
+
+Clone the repo into your Godot project (note: if you're using git already, beware of [nested repos](https://stackoverflow.com/questions/1871282/nested-git-repositories)).
+
+In your Godot project:
+1) Import your `.yarn.txt` file so that it shows up in the `res://` directory. **Note: Must be a `.yarn.txt` file (we don't currently support JSON or other filetypes**
+2) Create a node and attach the `dialogue_runner.gd` script
+3) Set the `Source Text` script variable of the `dialogue_runner.gd` script to your `.yarn.txt` file
+4) Write a script that extends 'DialogueUIBehavior`. This is the main controller for how the dialogue will affect the scene. The important function to write is `run_line()`. See [Unity Yarn Spinner's documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Unity/YarnSpinner-with-Unity-StepByStep.md) for more info
+5) In another script, assign your new dialogue UI script as the `dialogue_ui` member of `DialogueRunner`. A simple example:
+
+```
+# main.gd
+
+func _ready():
+   $dialogue.dialogue_ui = $dialogue_ui
+
+```
+   
+Feel free to experiment with different setups that work for you! If you're familiar with Unity, it might be helpful to get started with Yarn Spinner in Unity first.
+
+
+### Help
 
 Join the [narrative game development](http://lab.to/narrativegamedev) Slack to ask questions of other experienced YarnSpinner users.
 
 ### Documentation
 
-The best documentation can be found in [Yarn Spinner for Unity documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Dialogue/General-Usage.md). Some if it specific for the Unity implementation, but much of it applies to Yarn in general. Also, the design of this port is similar enought that that documentation should be pretty helpful.
+The best documentation can be found in [Yarn Spinner for Unity documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Dialogue/General-Usage.md). Some of it is specific for the Unity implementation, but much of it applies to Yarn in general and is helpful for using yarnspinnergd. Also, the design of this port is similar enough that that documentation should be pretty helpful.
 
-A few key differences to watch out for:
-* todo: naming convention is different run_line vs RunLine
+However, there are few key differences to watch out for:
+* C# and GDScript differ in syntax, conventions and philosophies
+  * Naming conventions are different
+  * There is a lot 
+* Naming conventions differ between C# and GDScript. For example, RunLine() in C# becomes run_line() in GDScript
 * todo: coroutines are different in GDScript
 * todo: a ton of missing features in this port
 * todo: other gotchas
@@ -40,18 +65,26 @@ A few key differences to watch out for:
 
 There are many ways to contribute! Including:
 * Using the tool and [reporting any issues](todo) you run into
-* Making things with the tool (let me know and I'll reshare!)
+* Making things with the tool (let @frojo know and he'll retweet/share!)
 * todo: other ways (or maybe delete this section for now)
 
 ### Contributing code/documentation
 
-We are very open to pull requests!
+We are very open to pull requests! Especially because @frojo is dubious as to how much time he'll have to work on this!
 
-In addition to the aforementioned [important missing features](TODO), there are many other ways to help
-* documentation (currently there is _none_)
+Things that are desperately needed:
+* Implementing one of the [important missing features](#missing-features)
+* A quickstart guide to help users get started as fast/easily as possible (todo: add Unity's as a good reference)
+* An simple example project
+* Documentation. The Unity Yarn Spinner docs are pretty useful, but would be helpful to have more detailed docs on this tool specifically
+
+## Roadmap/Plans
+
+This tools is currently being developed on a best-effort basis. There are no planned timelines for adding new features etc. As of July 2019, @frojo _thinks_ he will be developing this more through the end of the 2019, but other priorities may come up.
+
 
 ## thankses
-I referenced a few other OSS tools for making this readme including:
+I referenced a few other OSS tools/docs for making this readme including:
 * [@galaxykate's OSSTA zine](https://github.com/galaxykate/OSSTA-Zine/blob/master/osta-zine.md) for guidance :pray:
 * the [contributor's covenant](https://www.contributor-covenant.org/)
 * Yarn Spinner's [readme](https://github.com/thesecretlab/YarnSpinner)
