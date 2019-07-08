@@ -6,7 +6,7 @@ yarnspinnergd is a tool for helping to make games with interactive dialogue in [
 
 ## Missing features
 
-yarnspinnergd is in very early development and is missing many important and core features of Yarn Spinner. This is what yarnspinnergd currently _does_ support:
+yarnspinnergd is in very early development and is ***missing many important and core features of Yarn Spinner***. This is what yarnspinnergd currently _does_ support:
 * importing .yarn.txt files
 * running pure text lines (i.e. any commands, conditionals, even node links are **not supported**)
 
@@ -51,22 +51,22 @@ There aren't any official community channels for yarnspinnergd yet, but there ar
 
 * Join the [narrative game development](http://lab.to/narrativegamedev) Slack to ask questions of other experienced YarnSpinner users.
 * Join the [Godot Discord/IRC/other channels](https://docs.godotengine.org/en/3.1/community/channels.html) for Godot questions
-* Report an [issue](https://github.com/frojo/yarnspinnergd/issues)
+* Report a yarnspinnergd-specific [issue](https://github.com/frojo/yarnspinnergd/issues)
 
 ### Documentation
 
-The best documentation can be found in [Yarn Spinner for Unity documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Dialogue/General-Usage.md). Some of it is specific for the Unity implementation, but much of it applies to Yarn in general and is helpful for using yarnspinnergd. Also, the design of this port is similar enough that that documentation should be pretty helpful.
+The best documentation can be found in [Yarn Spinner for Unity documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Dialogue/General-Usage.md). Some of it is specific to the Unity implementation, but much of it applies to Yarn Spinner in general and is helpful for using yarnspinnergd. Also, the design of this port is similar enough that that documentation should be pretty helpful.
 
-However, there are few key differences to watch out for:
+_However_, there are few key differences to watch out for:
 * C# and GDScript differ in syntax, conventions and philosophies
-  * Naming conventions differ. For example, RunLine() in C# becomes run_line() in GDScript
+  * Naming conventions differ. For example, `RunLine()` in C# becomes `run_line()` in GDScript
   * GDScript is not statically typed by default. yarnspinnergd tries to leverage GDScript's [optional static typing](https://docs.godotengine.org/en/3.1/getting_started/scripting/gdscript/static_typing.html) where it can, but that part of Godot is still pretty buggy.
   * [Coroutines work differently in Godot](https://docs.godotengine.org/en/3.1/getting_started/scripting/gdscript/gdscript_basics.html#coroutines-with-yield)
 * As mentioned, this port is [missing many features](#missing-features)
 
 ## How to contribute
 
-If you want to contribute, here are a few ideas how:
+If you want to contribute, woo! Yay! Please help! Here are a few ideas how:
 * Using the tool and [reporting any issues](https://github.com/frojo/yarnspinnergd/issues) you run into
 * Making things with the tool (let @frojo know if you make something and he'll retweet/share!)
 * Contributing code/documentation/tutorials
@@ -87,7 +87,7 @@ This tool is currently being developed on a best-effort basis. There are no plan
 
 
 ## thankses
-I referenced a few other OSS tools/docs for making this readme including:
+A few OSS tools/docs were referenced for making this readme including:
 * [@galaxykate's OSSTA zine](https://github.com/galaxykate/OSSTA-Zine/blob/master/osta-zine.md) for guidance :pray:
 * the [contributor's covenant](https://www.contributor-covenant.org/)
 * Yarn Spinner's [readme](https://github.com/thesecretlab/YarnSpinner)
