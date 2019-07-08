@@ -30,7 +30,7 @@ In your Godot project:
 1. Import your `.yarn.txt` file so that it shows up in the `res://` directory. **Note: Must be a `.yarn.txt` file (we don't currently support JSON or other filetypes**
 1. Create a Node and attach the `dialogue_runner.gd` script to it
 1. Set the exported `Source Text` script variable of the `dialogue_runner.gd` script to the path to your `.yarn.txt` file
-1. Write a script that extends 'DialogueUIBehavior`. This will be the main controller for how the dialogue will affect the scene. The important function to write is `run_line()`. See [Unity Yarn Spinner's documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Unity/YarnSpinner-with-Unity-StepByStep.md) for more info
+1. Write a script that extends `DialogueUIBehavior`. This will be the main controller for how the dialogue will affect the scene. The important function to write is `run_line()`. See [Unity Yarn Spinner's documentation](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Unity/YarnSpinner-with-Unity-StepByStep.md) for more info
 1. Create a Node and attach your custom Dialogue UI script.
 1. In another script, assign your new dialogue UI script as the `dialogue_ui` member of `DialogueRunner`. A simple example:
 
