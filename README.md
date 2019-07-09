@@ -82,6 +82,8 @@ Things that are desperately needed:
   * See [Unity Yarn Spinner's quickstart guide](https://github.com/thesecretlab/YarnSpinner/blob/master/Documentation/YarnSpinner-Unity/YarnSpinner-with-Unity-QuickStart.md)
 * Documentation. The Unity Yarn Spinner docs are pretty useful, but would be helpful to have more detailed docs on this tool specifically
 
+If this is your first time doing a pull request, here's a [helpful tutorial](https://gist.github.com/Chaser324/ce0505fbed06b947d962).
+
 ## Roadmap/Plans
 
 This tool is currently being developed on a best-effort basis. There are no planned timelines for adding new features etc. As of July 2019, @frojo _thinks_ he will be developing this more through the end of the 2019, but other priorities may come up.
