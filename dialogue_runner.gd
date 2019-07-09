@@ -22,8 +22,8 @@ func _process(delta: float) -> void:
 	pass
 
 func start_dialogue(start_node: String = 'Start') -> void:
-	# todo: package this pattern into a function
-	# but also need to like loop on this or something
+	# todo: package this pattern into a function?
+	# but also maybe need to like loop on this or something
 	var ret = dialogue_ui.dialogue_started()
 	if ret:
 		yield(ret, 'completed')
@@ -39,7 +39,8 @@ func start_dialogue(start_node: String = 'Start') -> void:
 		elif step is Dialogue.NodeCompleteResult:
 			print('(dr) todo: handle node copmlete')
 
-	# todo: make this yield-able?
-	dialogue_ui.dialogue_complete()
+	ret = dialogue_ui.dialogue_complete()
+	if ret:
+		yield(ret, 'completed')
 
 

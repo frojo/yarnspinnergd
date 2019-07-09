@@ -2,7 +2,7 @@
 
 **WARNING: yarnspinnergd is still super barebones and in early development. It lacks _almost all_ of the standard features of Unity Yarn Spinner and is very untested. [See below](#missing-features) for more details.**
 
-yarnspinnergd is a tool for helping to make games with interactive dialogue in [Godot](https://godotengine.org/). It's port of [Yarn Spinner](https://github.com/thesecretlab/YarnSpinner). It serves the same purpose as Unity YarnSpinner (and adhere's pretty closely to its design), but is written entirely in GDScript instead of C#.
+yarnspinnergd is a tool for helping to make games with interactive dialogue in [Godot 3](https://godotengine.org/). It's port of [Yarn Spinner](https://github.com/thesecretlab/YarnSpinner). It serves the same purpose as Unity YarnSpinner (and adhere's pretty closely to its design), but is written entirely in GDScript instead of C#.
 
 ## Missing features
 
@@ -63,6 +63,7 @@ _However_, there are few key differences to watch out for:
   * GDScript is not statically typed by default. yarnspinnergd tries to leverage GDScript's [optional static typing](https://docs.godotengine.org/en/3.1/getting_started/scripting/gdscript/static_typing.html) where it can, but that part of Godot is still pretty buggy.
   * [Coroutines work differently in Godot](https://docs.godotengine.org/en/3.1/getting_started/scripting/gdscript/gdscript_basics.html#coroutines-with-yield)
 * As mentioned, this port is [missing many features](#missing-features)
+* Some of the spellings have been Americanized (e.g. `tokenise` -> `tokenize`). Not for any good reason. But if you're grepping for something and you can't find it, that might be why
 
 ## How to contribute
 
