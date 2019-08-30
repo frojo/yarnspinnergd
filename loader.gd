@@ -128,11 +128,11 @@ func load(file_name: String) -> Program:
 
 	for node_info in node_infos:
 		tokens = lexer.tokenize(node_info.title, node_info.lines)
-		print_tokens(tokens)
+		# print_tokens(tokens)
 		var node := Parser.new(tokens).parse()
 		node.name = node_info.title
 
-		print_parse_tree(node)
+		# print_parse_tree(node)
 
 		nodes[node_info.title] = node
 		nodes_loaded += 1
