@@ -76,6 +76,11 @@ func run_next() -> void:
 	if execution_state == ExecutionState.STOPPED:
 		execution_state = ExecutionState.RUNNING
 
+	if not current_node:
+		execution_state = ExecutionState.STOPPED
+		print('(virtual_machine.gd): error: current node is null')
+		return
+
 	var current_instruction : Program.Instruction = current_node.instructions[state.program_counter]
 
 	run_instruction(current_instruction)

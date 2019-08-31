@@ -117,7 +117,7 @@ func load(file_name: String) -> Program:
 	var file := File.new()
 	file.open(file_name, file.READ)
 	if not file.is_open():
-		print('todo: handle error parsing file')
+		print('(loader.hd) todo: handle error parsing file %s' % file_name)
 
 	# var node_infos := get_nodes_from_file(file_name)
 	var node_infos := get_nodes_from_text(file.get_as_text())
