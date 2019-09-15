@@ -4,7 +4,6 @@ class_name Loader
 var Dialogue = load('res://addons/yarnspinner/dialogue.gd')
 
 var dialogue
-var lexer: Lexer
 
 class NodeInfo:
 	# the node's title
@@ -123,11 +122,10 @@ func load(file_name: String) -> Program:
 	var node_infos := get_nodes_from_text(file.get_as_text())
 	var nodes_loaded := 0
 
-	lexer = Lexer.new()
 	var tokens: Array
 
 	for node_info in node_infos:
-		tokens = lexer.tokenize(node_info.title, node_info.lines)
+		tokens = Lexer.new().tokenize(node_info.title, node_info.lines)
 		# print_tokens(tokens)
 		var node := Parser.new(tokens).parse()
 		node.name = node_info.title

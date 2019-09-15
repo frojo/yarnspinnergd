@@ -179,6 +179,12 @@ class LexerState:
 var default_state: LexerState
 var current_state: LexerState
 
+# tracks indentation levels and whether an 
+# indent token was emitted for each level
+# note: use push_back instead of push_front() since push_front() is O(n)
+var indentation_stack := [] # stack of [int, bool] pairs
+var should_track_next_indentation := false
+
 # String -> LexerState
 var states: Dictionary
 
@@ -191,7 +197,7 @@ func _init():
 	patterns[TokenType.TEXT] = '.'
 	patterns[TokenType.NUMBER] = '\\-?[0-9]+(\\.[0-9+])?'
 
-	patterns[TokenType.BEGIN_COMMAND] = '\\<\\<'
+	# patterns[TokenType.BEGIN_COMMAND] = '\\<\\<'
 
 	states = {}
 
@@ -210,6 +216,10 @@ func _init():
 # lines is an array of lines that represents the node body
 func tokenize(title: String, lines: Array) -> Array:
 	var tokens := []
+
+	indentation_stack = [] # stack of <int, bool> 
+	indentation_stack.push_back([0, false])
+	should_track_next_indentation = false
 
 	current_state = default_state
 	var line_number := 1

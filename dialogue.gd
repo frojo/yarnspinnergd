@@ -89,11 +89,15 @@ class RunnerResultIterator:
 	func node_complete_handler(result: LineResult):
 		latest_result = result
 
+	func options_handler(result: OptionSetResult):
+		latest_result = result
+
 	func _init(program: Program, start_node: String) -> void:
 		vm = VirtualMachine.new(program)
 		vm.line_handler = funcref(self, 'line_handler')
 		vm.command_handler = funcref(self, 'command_handler')
 		vm.node_complete_handler = funcref(self, 'command_handler')
+		vm.options_handler = funcref(self, 'options_handler')
 
 		self.program = program
 		self.start_node = start_node

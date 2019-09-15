@@ -8,8 +8,11 @@ class State:
 	# instruction number in the current node
 	var program_counter: int = 0
 
+	# list of options, where each option = <id, destination node>
+	var current_options := [] # of Arrays of Strings
+
 	# used as a stack of Values
-	var stack = [] # of Values
+	var stack := [] # of Values
 
 # 	# methods for working with the stack
 # 	func push_value(o) -> void:
@@ -36,7 +39,8 @@ func reset_state() -> void:
 
 var line_handler: FuncRef # (Dialogue.LineResult)
 var command_handler: FuncRef # (Dialogue.CommandResult)
-var node_complete_handler: FuncRef # (Dialogue.NodeCompleteResul)
+var node_complete_handler: FuncRef # (Dialogue.NodeCompleteResult)
+var options_handler: FuncRef # (Dialogue.OptionSetResult)
 
 var program: Program
 var state = State.new()
@@ -106,6 +110,12 @@ func run_instruction(i: Program.Instruction) -> void:
 				print('(vm) todo: handle line_text null')
 				return
 			line_handler.call_func(Dialogue.LineResult.new(line_text))
+		Program.ByteCode.ADD_OPTION:
+			# add an option to the current state
+			var id := i.operand_a as String
+			var dest_node = i.operand_b as String
+			state.current_options.append([id, dest_node])
+			print('added option %s to dest node %s' % [id, dest_node])
 		Program.ByteCode.STOP:
 			# immediately stop execution, and report it
 			node_complete_handler.call_func(Dialogue.NodeCompleteResult.new(''))
