@@ -159,12 +159,12 @@ class LexerState:
 
 	func add_transition(type: int, enters_state: String,
 			delimits_text: bool = false) -> TokenRule:
-		# todo: make this work right
 		var pattern : String = patterns[type]
 		if not pattern:
 			print('todo: handle pattern not being string')
 			return null
 	
+		# todo: make this work right
 		var regex := RegEx.new()
 		print('todo: make sure this regex is being compiled correctly')
 		regex.compile(pattern)
@@ -175,6 +175,12 @@ class LexerState:
 	
 		return rule
 
+# single-line comments. if this is encountered at any point, the rest of the
+# the line is skipepd
+const LINE_COMMENT := '//'
+
+# String -> LexerState
+var states: Dictionary
 
 var default_state: LexerState
 var current_state: LexerState
@@ -184,9 +190,6 @@ var current_state: LexerState
 # note: use push_back instead of push_front() since push_front() is O(n)
 var indentation_stack := [] # stack of [int, bool] pairs
 var should_track_next_indentation := false
-
-# String -> LexerState
-var states: Dictionary
 
 func _init():
 	print('new lexer')
@@ -202,7 +205,7 @@ func _init():
 	states = {}
 
 	states['base'] = LexerState.new(patterns)
-	states['base'].add_transition(TokenType.BEGIN_COMMAND, 'command', true)
+	# states['base'].add_transition(TokenType.BEGIN_COMMAND, 'command', true)
 	# states['base'].add_transition(TokenType.BEGINCOMMAND, 'command', true)
 	# add_transition(states['base'], TokenType.BEGINCOMMAND, 'command', true)
 
@@ -215,33 +218,214 @@ func _init():
 # title is title of the node
 # lines is an array of lines that represents the node body
 func tokenize(title: String, lines: Array) -> Array:
-	var tokens := []
+	print('tokenizing')
 
 	indentation_stack = [] # stack of <int, bool> 
 	indentation_stack.push_back([0, false])
 	should_track_next_indentation = false
 
+	var tokens := []
+
 	current_state = default_state
+
+	# add a blank line to ensure that we end with zero indentation
+	lines.append('')
+
 	var line_number := 1
 
 	for line in lines:
 		tokens += tokenize_line(line, line_number)
 		line_number += 1
 
+	var end_of_input = Token.new(TokenType.END_OF_INPUT, current_state,
+				line_number, 0)
+	tokens.append(end_of_input)
+
 	return tokens
 
 
 # returns Array of Tokens
 func tokenize_line(line: String, line_number: int) -> Array:
-	var line_tokens = []
+	var line_tokens := [] # stack of Tokens
 
+	print('tokenizing line %s' % line)
+
+	# replace tabs with four spaces
+	line = line.replace('\t', '    ')
+
+	# strip out \r's
+	line = line.replace('\r', '')
+
+	# record the indentation level if the previous state wants us to
+	var this_indentation := line_indentation(line)
+	print('debug: indentation for line (%s) = %s' % [line, this_indentation])
+	var prev_indentation = indentation_stack.back()
+	print('debug: prev indentation is %s' % prev_indentation[0])
+
+
+
+
+	if (should_track_next_indentation and 
+			this_indentation > prev_indentation[0]):
+		indentation_stack.push_back([this_indentation, true])
+		var indent := Token.new(TokenType.Indent, current_state,
+				line_number, prev_indentation[0])
+
+		# this string magic is making a string of spaces
+		# the author of this code is mostly just coping the
+		# implementation of C# YarnSpinner circa 2019.
+		# i don't know why we're doing this
+		var indent_diff = this_indentation - prev_indentation[0]
+		var spaces := ''
+		for i in indent_diff:
+			spaces += ' '
+		indent.value = spaces
+
+		should_track_next_indentation = false
+		line_tokens.push_back(indent)
+
+	elif this_indentation < prev_indentation[0]:
+		# if we are less indented, emit a dedent key for every
+		# indentation level that we passed on the way back to 0 that
+		# also emitted an indentation token.
+		# at the same time, remove thos indent levels from the stack
+
+		while (this_indentation < indentation_stack.back()[0]):
+			var top_level = indentation_stack.pop_back()
+			if (top_level[1]):
+				var dedent := Token.new(TokenType.DETENT,
+						current_state, line_number, 0)
+				line_tokens.push_back(dedent)
+
+
+	# now that we're past any initial indentation, start finding tokens
+	var col_number := this_indentation
+	var whitespace := RegEx.new()
+	whitespace.compile('\\s*')
+
+	# debug
 	var fake_token = Token.new(TokenType.TEXT, current_state,
 			line_number, 0, line)
-
 	line_tokens.append(fake_token)
 
+	while col_number < line.length():
+		# if we're about to hit a line comment, abort processing
+		# line immediately
+		if (line.substr(col_number, 
+			line.length() - col_number).begins_with(LINE_COMMENT)):
+			break
+		
+		var matched = false
+
+		# debug
+		print('bout to go through rules of state: %s' % current_state.name)
+		for rule in current_state.token_rules:
+			print('trying to match rule %s' % rule)
+			return line_tokens
+			var regex_match = rule.regex.search(line, col_number)
+			if not regex_match:
+				continue
+			
+			var token_text: String
+
+			if (rule.type == TokenType.TEXT):
+				# if this is text,t hen back up to the most
+				# recent text delimitting token, and treat
+				# everything from there as text.
+				# we do this because we don't want this:
+				#    <<flip Harley3 +1>>
+				# to get matched as this:
+				# BEGIN_COMMAND IDENTIFIER('flip') TEXT('Harley3 +1') END_COMMAND
+				# instead, we want to match it as this
+				# BEGIN_COMMAND TEXT('flip Harley3 +1') END_COMMAND
+
+
+				var text_start_idx := this_indentation
+				if not line_tokens.empty():
+					while (line_tokens.back().type ==
+						TokenType.IDENTIFIER):
+						line_tokens.pop_back()
+					var start_delimiter_token = line_tokens.back()
+					text_start_idx = start_delimiter_token.col_number
+					if (start_delimiter_token.type == 
+						TokenType.INDENT):
+						text_start_idx += start_delimiter_token.value.length()
+					elif (start_delimiter_token.type ==
+						TokenType.DEDENT):
+						text_start_idx = this_indentation
+
+				col_number = text_start_idx
+
+				var text_end_idx = regex_match.get_end()
+				
+				token_text = line.substr(text_start_idx,
+						text_end_idx - text_start_idx)
+			else:
+				token_text = regex_match.get_string()
+
+			col_number += token_text.length()
+
+			# if this was a string, lop off the quotes at the
+			# start and end, and un-escape the quotes and slashes
+			if (rule.type == TokenType.STRING):
+				token_text = token_text.substr(1,
+						token_text.length() - 1)
+				token_text = token_text.replace('\\\\', '\\')
+				token_text = token_text.replace('\\""', '""')
+
+			var token = Token.new(rule.type, current_state,
+					line_number, col_number, token_text)
+
+			token.delimits_text = rule.delimits_text
+
+			line_tokens.push_back(token)
+
+			if rule.enters_state != null:
+				if not states.has(rule.enters_state):
+					print('(lexer.gd): ERROR: Unknown tokenizer state %s' % rule.enters_state)
+				enter_state(states[rule.enters_state])
+
+				if should_track_next_indentation:
+					if (indentation_stack.back()[0] <
+						this_indentation):
+						indentation_stack.push_back(
+							[this_indentation, false])
+
+			matched = true
+			break
+
+		print('okay done matching rules')
+		return line_tokens
+
+		if not matched:
+			print('(lexer.gd): ERROR: Didn\'t get expected tokens')
+
+
+		# consume any lingering whitespace before the next token
+		var last_whitespace = whitespace.search(line, col_number)
+		if last_whitespace != null:
+			col_number += (last_whitespace.get_end() - 
+				last_whitespace.get_start())
+			
+	line_tokens.invert()
 	return line_tokens
 
+
+func line_indentation(line: String) -> int:
+	var initial_indent_regex = RegEx.new()
+	initial_indent_regex.compile('^(\\s*)')
+	var regex_match = initial_indent_regex.search(line)
+
+	if not regex_match:
+		return 0
+
+	return regex_match.get_end(0) - regex_match.get_start(0)
+
+func enter_state(state: LexerState):
+	current_state = state
+
+	if (current_state.set_track_next_indentation):
+		should_track_next_indentation = true
 
 	# todo: handle indentations
 
