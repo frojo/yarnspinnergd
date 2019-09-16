@@ -157,7 +157,7 @@ class LexerState:
 	func _init(patterns: Dictionary) -> void:
 		self.patterns = patterns
 
-	func add_transition(type: int, enters_state: String,
+	func add_transition(type: int, enters_state: String = '',
 			delimits_text: bool = false) -> TokenRule:
 		var pattern : String = patterns[type]
 		if not pattern:
@@ -174,6 +174,21 @@ class LexerState:
 		token_rules.append(rule)
 	
 		return rule
+
+	func add_text_rule(type: int, enters_state: String = '') -> TokenRule:
+		if contains_text_rule:
+			print('(lexer.gd): ERROR!: State already contains a text rule')
+
+		var delimiter_rules = []
+
+		for other_rule in token_rules:
+			if other_rule.delimits_text:
+				# CONTINUE HERE
+				delimiter_rules.append('')
+
+		# create a regex that matches all text up to but not including
+		# any of the delimiter rules
+		var pattern = ''
 
 # single-line comments. if this is encountered at any point, the rest of the
 # the line is skipepd
@@ -201,13 +216,15 @@ func _init():
 	patterns[TokenType.NUMBER] = '\\-?[0-9]+(\\.[0-9+])?'
 
 	# patterns[TokenType.BEGIN_COMMAND] = '\\<\\<'
+	patterns[TokenType.SHORTCUT_OPTION] = '\\-\\>'
 
 	states = {}
 
 	states['base'] = LexerState.new(patterns)
-	# states['base'].add_transition(TokenType.BEGIN_COMMAND, 'command', true)
 	# states['base'].add_transition(TokenType.BEGINCOMMAND, 'command', true)
-	# add_transition(states['base'], TokenType.BEGINCOMMAND, 'command', true)
+	states['base'].add_transition(TokenType.SHORTCUT_OPTION, 'shortcut-option')
+	states['base'].add_transition(TokenType.TEXT)
+
 
 	default_state = states['base']
 
@@ -329,7 +346,7 @@ func tokenize_line(line: String, line_number: int) -> Array:
 			var token_text: String
 
 			if (rule.type == TokenType.TEXT):
-				# if this is text,t hen back up to the most
+				# if this is text, then back up to the most
 				# recent text delimitting token, and treat
 				# everything from there as text.
 				# we do this because we don't want this:
