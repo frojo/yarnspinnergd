@@ -27,7 +27,7 @@ enum TokenType {
 	VARIABLE,
 
 	# Shortcut syntax ("->")
-	SHORTCUT_OPTION,
+	SHORTCUT_OPTION, # (11)
 
 	# Option syntax ("[[Let's go here|Destination]]")
 	OPTION_START, # [[
@@ -178,18 +178,19 @@ class LexerState:
 		return rule
 
 	func add_text_rule(type: int, enters_state: String = '') -> TokenRule:
+		print('ERROR: THIS IS UNTESTED AND BROKEN CODE')
 		if contains_text_rule():
 			print('(lexer.gd): ERROR!: State already contains a text rule')
 
 		var delim_rules = []
 
-		print('debug: adding text rule')
+		# print('debug: adding text rule')
 		for other_rule in token_rules:
 			if other_rule.delimits_text:
-				print('debug: THIS IS UNTESTED CODE. NEVER HAD DELIMIT THING')
+				# print('debug: THIS IS UNTESTED CODE. NEVER HAD DELIMIT THING')
 				var pattern = other_rule.regex.get_pattern()
 				pattern = pattern.substr(2, pattern.length() - 2)
-				print('debug: formatted pattern : %s' % '({0})'.format([pattern]))
+				# print('debug: formatted pattern : %s' % '({0})'.format([pattern]))
 				delim_rules.append('({0})'.format([pattern]))
 
 				# CONTINUE HERE
@@ -202,9 +203,9 @@ class LexerState:
 
 		# create a regex that matches all text up to but not including
 		# any of the delimiter rules
-		print('debug: joined delim rules: %s' % joined_delim_rules)
+		# print('debug: joined delim rules: %s' % joined_delim_rules)
 		var pattern := '\\G((?!{0}).)*'.format([joined_delim_rules])
-		print('debug: final text rule pattern: %s' % pattern)
+		# print('debug: final text rule pattern: %s' % pattern)
 		var rule := add_transition(type, enters_state)
 		rule.regex = RegEx.new()
 		rule.regex.compile(pattern)
@@ -240,8 +241,10 @@ func _init():
 	# TokenType -> String
 	var patterns := {}
 
-	patterns[TokenType.TEXT] = '.'
+	patterns[TokenType.TEXT] = '.*'
 	patterns[TokenType.NUMBER] = '\\-?[0-9]+(\\.[0-9+])?'
+
+	patterns[TokenType.TAG_MARKER] = '\\#'
 
 	# patterns[TokenType.BEGIN_COMMAND] = '\\<\\<'
 	patterns[TokenType.SHORTCUT_OPTION] = '\\-\\>'
@@ -251,10 +254,13 @@ func _init():
 	states['base'] = LexerState.new(patterns)
 	# states['base'].add_transition(TokenType.BEGINCOMMAND, 'command', true)
 	states['base'].add_transition(TokenType.SHORTCUT_OPTION, 'shortcut-option')
-	states['base'].add_text_rule(TokenType.TEXT)
+	# states['base'].add_transition(TokenType.TAG_MARKER, 'tag', true)
+	states['base'].add_transition(TokenType.TEXT)
 	states['shortcut-option'] = LexerState.new(patterns)
-
-	# states['shortcut-option'].add_transition(SHORTCUT_OPTION, 'shortcut-option')
+	states['shortcut-option'].set_track_next_indentation = true
+	# states['shortcut-option'].add_transition(TokenType.TAG_MARKER,
+	# 		'shortcut-option-tag', true)
+	states['shortcut-option'].add_transition(TokenType.TEXT, 'base')
 
 
 
@@ -267,7 +273,7 @@ func _init():
 # title is title of the node
 # lines is an array of lines that represents the node body
 func tokenize(title: String, lines: Array) -> Array:
-	print('tokenizing')
+	# print('debug: tokenizing')
 
 	indentation_stack = [] # stack of <int, bool> 
 	indentation_stack.push_back([0, false])
@@ -297,7 +303,7 @@ func tokenize(title: String, lines: Array) -> Array:
 func tokenize_line(line: String, line_number: int) -> Array:
 	var line_tokens := [] # stack of Tokens
 
-	print('tokenizing line %s' % line)
+	# print('debug: tokenizing line %s' % line)
 
 	# replace tabs with four spaces
 	line = line.replace('\t', '    ')
@@ -307,15 +313,15 @@ func tokenize_line(line: String, line_number: int) -> Array:
 
 	# record the indentation level if the previous state wants us to
 	var this_indentation := line_indentation(line)
-	print('debug: indentation for line (%s) = %s' % [line, this_indentation])
 	var prev_indentation = indentation_stack.back()
-	print('debug: prev indentation is %s' % prev_indentation[0])
+	# print('debug: this_indent=%s prev_indent=%s' % [this_indentation, 
+	# 	prev_indentation[0]])
 
 
 	if (should_track_next_indentation and 
 			this_indentation > prev_indentation[0]):
 		indentation_stack.push_back([this_indentation, true])
-		var indent := Token.new(TokenType.Indent, current_state,
+		var indent := Token.new(TokenType.INDENT, current_state,
 				line_number, prev_indentation[0])
 
 		# this string magic is making a string of spaces
@@ -340,7 +346,7 @@ func tokenize_line(line: String, line_number: int) -> Array:
 		while (this_indentation < indentation_stack.back()[0]):
 			var top_level = indentation_stack.pop_back()
 			if (top_level[1]):
-				var dedent := Token.new(TokenType.DETENT,
+				var dedent := Token.new(TokenType.DEDENT,
 						current_state, line_number, 0)
 				line_tokens.push_back(dedent)
 
@@ -350,10 +356,6 @@ func tokenize_line(line: String, line_number: int) -> Array:
 	var whitespace := RegEx.new()
 	whitespace.compile('\\s*')
 
-	# debug
-	var fake_token = Token.new(TokenType.TEXT, current_state,
-			line_number, 0, line)
-	line_tokens.append(fake_token)
 
 	while col_number < line.length():
 		# if we're about to hit a line comment, abort processing
@@ -365,12 +367,13 @@ func tokenize_line(line: String, line_number: int) -> Array:
 		var matched = false
 
 		# debug
-		print('bout to go through rules of state: %s' % current_state.name)
 		for rule in current_state.token_rules:
-			print('trying to match rule %s' % rule.type)
+			# print('debug: trying to match rule %s' % rule.type)
 			var regex_match = rule.regex.search(line, col_number)
 			if not regex_match:
+				# print('debug: not a match')
 				continue
+			# print('debug: yes a match: %s' % regex_match.get_string())
 			
 			var token_text: String
 
@@ -385,9 +388,13 @@ func tokenize_line(line: String, line_number: int) -> Array:
 				# instead, we want to match it as this
 				# BEGIN_COMMAND TEXT('flip Harley3 +1') END_COMMAND
 
-
+				# print('debug: and it\'s a text rule')
 				var text_start_idx := this_indentation
 				if not line_tokens.empty():
+					# print('debug: backing up to text delimit token')
+					# debug
+					# for ltoken in line_tokens:
+					# 	print('debug: ltoken=%s' % ltoken.type)
 					while (line_tokens.back().type ==
 						TokenType.IDENTIFIER):
 						line_tokens.pop_back()
@@ -401,11 +408,14 @@ func tokenize_line(line: String, line_number: int) -> Array:
 						text_start_idx = this_indentation
 
 				col_number = text_start_idx
+				# print('debug: at text start, col_number=%s' % col_number)
 
 				var text_end_idx = regex_match.get_end()
+				# print('debug: text_end_idx=%s' % text_end_idx)
 				
 				token_text = line.substr(text_start_idx,
 						text_end_idx - text_start_idx)
+				# print('debug: token_text=%s' % token_text)
 			else:
 				token_text = regex_match.get_string()
 
@@ -440,8 +450,6 @@ func tokenize_line(line: String, line_number: int) -> Array:
 			matched = true
 			break
 
-		print('debug: okay done matching rules')
-		return line_tokens
 
 		if not matched:
 			print('(lexer.gd): ERROR: Didn\'t get expected tokens')
@@ -452,8 +460,9 @@ func tokenize_line(line: String, line_number: int) -> Array:
 		if last_whitespace != null:
 			col_number += (last_whitespace.get_end() - 
 				last_whitespace.get_start())
+
 			
-	line_tokens.invert()
+	# we /don't/ invert the array, since we use push_back and pop_back
 	return line_tokens
 
 
