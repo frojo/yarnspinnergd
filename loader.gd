@@ -130,7 +130,7 @@ func load(file_name: String) -> Program:
 		var node := Parser.new(tokens).parse()
 		node.name = node_info.title
 
-		# print_parse_tree(node)
+		print_parse_tree(node)
 
 		nodes[node_info.title] = node
 		nodes_loaded += 1
