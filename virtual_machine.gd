@@ -110,12 +110,12 @@ func run_instruction(i: Program.Instruction) -> void:
 				print('(vm) todo: handle line_text null')
 				return
 			line_handler.call_func(Dialogue.LineResult.new(line_text))
-		Program.ByteCode.ADD_OPTION:
-			# add an option to the current state
-			var id := i.operand_a as String
-			var dest_node = i.operand_b as String
-			state.current_options.append([id, dest_node])
-			print('added option %s to dest node %s' % [id, dest_node])
+# 		Program.ByteCode.ADD_OPTION:
+# 			# add an option to the current state
+# 			var id := i.operand_a as String
+# 			var dest_node = i.operand_b as String
+# 			state.current_options.append([id, dest_node])
+# 			print('added option %s to dest node %s' % [id, dest_node])
 		Program.ByteCode.STOP:
 			# immediately stop execution, and report it
 			node_complete_handler.call_func(Dialogue.NodeCompleteResult.new(''))
